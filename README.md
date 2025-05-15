@@ -1,5 +1,6 @@
 # Lambda Capture MCP Server
-MCP implementation of our standard [Semantic Search API](https://github.com/lambda-capture/Semantic-Search-API)
+MCP implementation of our standard [Semantic Search API for Macroeconomic Data](https://github.com/lambda-capture/Semantic-Search-API)
+![Lambda Capture MCP Server](logo.png)
 ## Pre-requisites
 - [Lambda Capture API key](https://lambda-capture.com/)
 - for MCP Typescript: [Node.js 18+ (includes npx and npm)](https://nodejs.org/en/download/)
