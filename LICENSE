@@ -1,0 +1,23 @@
+# API License Agreement
+This API License Agreement ("Agreement") is entered into by and between you ("Licensee") and Lambda Capture Limited ("Licensor") registration number 15845351, 52 Tabernacle Street, London, EC2A 4NJ.
+
+## 1. License Grant
+Licensor grants Licensee a non-exclusive, non-transferable, limited license to use the API and its associated data ("API Data") solely for research purposes or other internal business operations. You are not permitted to copy, modify, distribute, or use the API or API Data for any external commercial purpose or resell it to any third party.
+
+## 2. Restrictions
+- The code and functionality of the API, including any related components and services, remain the exclusive property of Lambda Capture Limited.  
+- Licensee shall not use the API or API Data for any purpose other than research or internal business operations.  
+- Licensee is prohibited from using the API or API Data from reselling or redistributing the API Data to third parties in any manner.  
+- Licensee shall not reverse engineer, decompile, or otherwise attempt to extract the underlying code of the API.
+
+## 3. Ownership
+All intellectual property rights, including but not limited to copyrights, trademarks, and patents, related to the API and API Data are owned by Lambda Capture Limited. This Agreement does not grant any ownership rights to Licensee.
+
+## 4. Term and Termination
+This Agreement is effective upon Licensee's acceptance and continues until terminated. By using the API, Licensee agrees to be bound by the terms of this Agreement. Licensor may terminate this Agreement at any time if Licensee breaches any of its terms. Upon termination, Licensee must immediately cease all use of the API and destroy any copies of the API Data.
+
+## 5. Limitation of Liability
+Licensor is not responsible for any damages resulting from Licensee's use or inability to use the API. Licensee uses the API at their own risk.
+
+## 6. Governing Law
+This Agreement shall be governed by and construed in accordance with the laws of the United Kingdom.
