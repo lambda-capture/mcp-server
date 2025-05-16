@@ -23,7 +23,7 @@ Go to Claude -> Settings -> Developer -> Edit Config. Add the following to your 
 ```json
 {
   "mcpServers": {
-    "lambda-capture": {
+    "lambda-capture-mcp": {
       "command": "node",
       "args": [
         "/Absolute Path to/mcp-server/dist/index.js"
@@ -31,7 +31,7 @@ Go to Claude -> Settings -> Developer -> Edit Config. Add the following to your 
       "env": {
         "LAMBDA_CAPTURE_API_KEY": "Your API Key string"
       },
-      "description": "Runs the Python MCP with Lambda Capture Macroeconomic Data API"
+      "description": "Runs the Node MCP with Lambda Capture Macroeconomic Data API"
     }
   }
 }
