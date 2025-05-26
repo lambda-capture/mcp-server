@@ -2,32 +2,65 @@
 MCP implementation of our standard [Semantic Search API for Macroeconomic Data](https://github.com/lambda-capture/Semantic-Search-API)
 ![Lambda Capture MCP Server](logo.png)
 
-# Remote MCP Server
+# Remote MCP Server (streamable HTTP)
 ### OpenAI Responses API
 ```python
 
+from openai import OpenAI
+
+client = OpenAI()
+
+resp = client.responses.create(
+    model="gpt-4.1",
+    input="Create a payment link for $20",
+    tools=[
+        {
+            "type": "mcp",
+            "server_label": "stripe",
+            "server_url": "https://mcp.lambda-capture.com/research/mcp/",
+            "headers": {
+                "Authorization": "Bearer YOUR_ACCESS_TOKEN"
+            }
+        }
+    ]
+)
+
+print(resp.output_text)
 
 ```  
-### Curl
+### Curl 
 ```json
 
 curl -X POST "https://mcp.lambda-capture.com/research/mcp/" \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -H "Authorization: Bearer 3124059d-d775-4f2a-a682-835e1f1251c9" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "tools/call",
-    "id": 1,
-    "params": {
-      "name": "macroecon_semantic_search",
-      "arguments": {
-        "query_text": "inflation expectations",
-        "max_results": 3,
-      }
+-H "Content-Type: application/json" \
+-H "Accept: application/json, text/event-stream" \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+-d '{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "id": 1,
+  "params": {
+    "name": "macroecon_semantic_search",
+    "arguments": {
+      "query_text": "inflation expectations",
+      "max_results": 3,
     }
-  }'
-```  
+  }
+}'
+```
+```json
+
+curl -X POST "https://mcp.lambda-capture.com/research/mcp" \
+-H "Content-Type: application/json" \
+-H "Accept: application/json" \
+-H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+-d '{
+    "jsonrpc": "2.0",
+    "id": "1",
+    "method": "list_tools",
+    "params": {}
+}'
+``` 
 ### Configure your MCP Client (Claude Desktop App)
 Go to Claude -> Settings -> Developer -> Edit Config. Add the following to your `claude_desktop_config.json`
 #### Node: 
@@ -38,7 +71,7 @@ Go to Claude -> Settings -> Developer -> Edit Config. Add the following to your 
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://lambda-mcp.azurewebsites.net/research/mcp/"",
+        "https://mcp.lambda-capture.com/research/mcp/"",
         "--header", "Authorization: Bearer YOUR_ACCESS_TOKEN"
       ],
       "description": "RemoteMCP with Lambda Capture Macroeconomic Data API"
