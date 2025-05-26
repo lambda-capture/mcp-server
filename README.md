@@ -1,9 +1,11 @@
 # Lambda Capture MCP Server
+[![Remote MCP Server](https://img.shields.io/website-up-down-green-red/http/lambda-mcp.azurewebsites.net/health-check/.svg?label=Remote%20MCP%20Status)](https://lambda-capture.com/) [![GET/POST API](https://img.shields.io/website-up-down-green-red/http/app.lambda-capture.com/.svg?label=GET/POST%20APIl)](https://lambda-capture.com/)  
+
 MCP implementation of our standard [Semantic Search API for Macroeconomic Data](https://github.com/lambda-capture/Semantic-Search-API)
 ![Lambda Capture MCP Server](logo.png)
 
-# Remote MCP Server (streamable HTTP)
-### OpenAI Responses API
+# [Remote MCP Server (streamable HTTP)](https://lambda-mcp.azurewebsites.net/)
+### [OpenAI Responses API](https://platform.openai.com/docs/guides/tools-remote-mcp)
 ```python
 
 from openai import OpenAI
@@ -12,11 +14,11 @@ client = OpenAI()
 
 resp = client.responses.create(
     model="gpt-4.1",
-    input="Create a payment link for $20",
+    input="Key shifts in inflation expectations",
     tools=[
         {
             "type": "mcp",
-            "server_label": "stripe",
+            "server_label": "lambda-capture",
             "server_url": "https://mcp.lambda-capture.com/research/mcp/",
             "headers": {
                 "Authorization": "Bearer YOUR_ACCESS_TOKEN"
@@ -26,10 +28,9 @@ resp = client.responses.create(
 )
 
 print(resp.output_text)
-
 ```  
 ### Curl 
-```json
+```bash
 
 curl -X POST "https://mcp.lambda-capture.com/research/mcp/" \
 -H "Content-Type: application/json" \
@@ -48,7 +49,7 @@ curl -X POST "https://mcp.lambda-capture.com/research/mcp/" \
   }
 }'
 ```
-```json
+```bash
 
 curl -X POST "https://mcp.lambda-capture.com/research/mcp" \
 -H "Content-Type: application/json" \
