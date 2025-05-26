@@ -17,12 +17,12 @@ if (!API_KEY) {
 // Define schemas using Zod
 const SemanticSearchSchema = z.object({
   query_text: z.string().describe("The search query text (e.g., \"Inflation expectations\"). **required parameter**."),
-  max_results: z.number().int().optional().default(10).describe("Maximum number of results to return"),
-  type: z.array(z.enum(["text", "table", "chart"])).optional().describe("List of content types to filter by"),
-  source: z.array(z.enum(["Federal Reserve", "Bank of England", "European Central Bank"])).optional().describe("List of sources to filter by"),
-  score: z.number().min(0).max(1).optional().default(0.75).describe("Minimum similarity score (0-1)"),
-  start_date: z.string().optional().default("2018-01-01").describe("Start date for filtering results (YYYY-MM-DD). If request needs recent/latest data, set nearest date to today up to 3 months ago."),
-  end_date: z.string().optional().describe("End date for filtering results (YYYY-MM-DD), defaults to today")
+  score: z.number().min(0).max(1).optional().default(0.75).describe("Minimum relevance score threshold"),
+  max_results: z.number().int().min(1).optional().default(10).describe("Maximum number of results to return"),
+  type: z.array(z.enum(["text", "table", "chart"])).optional().describe("Filter results by content type (text, table, or chart) or None for all"),
+  source: z.array(z.enum(["Federal Reserve", "Bank of England", "European Central Bank"])).optional().describe("Filter results by source institution or None for all"),
+  start_date: z.string().optional().default("2018-01-01").describe("Start date for filtering results (YYYY-MM-DD). If request needs recent/latest data, set start_date nearest to today up to 3 months ago."),
+  end_date: z.string().optional().describe("End date for filtering results (YYYY-MM-DD). if None, set to today - this is better for **most recent data**. default is today")
 });
 
 // Create MCP server instance
@@ -46,6 +46,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "macroecon_semantic_search",
         description: "Perform semantic search on Macroeconomic Data Knowledge Base from Federal Reserve, Bank of England, and European Central Bank.",
         inputSchema: zodToJsonSchema(SemanticSearchSchema),
+        annotations: {
+          readOnlyHint: true,
+          idempotentHint: true,
+          openWorldHint: true 
+        }
       },
     ],
   };
@@ -89,7 +94,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           });
 
           const data = response.data;
-          const maxTokens = 100000;
+          const maxTokens = 2_000; // Claude's Pro context window size is 100_000
           const totalTokens = data.reduce((sum: number, item: any) => sum + (item.token_count || 0), 0);
 
           if (totalTokens > maxTokens) {
@@ -116,7 +121,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         } catch (error) {
           if (axios.isAxiosError(error)) {
-            const errorMessage = error.response?.data?.['error message'] || error.message;
+            const errorMessage = error.response?.data?.['error'] || error.message;
             throw new Error(`Lambda Capture semantic search failed: ${errorMessage}`);
           }
           throw error;

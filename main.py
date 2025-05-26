@@ -1,10 +1,18 @@
-from mcp.server.fastmcp import FastMCP
 import os
 import sys
 import httpx
+from pydantic import Field
 from typing import Literal, Optional
 from datetime import datetime, timezone
+from starlette.responses import JSONResponse
 
+from mcp.server.fastmcp import FastMCP
+from mcp.shared.exceptions import McpError
+from mcp.types import (
+    EmptyResult,
+    ErrorData,
+    ToolAnnotations
+)
 API_KEY = os.getenv("LAMBDA_CAPTURE_API_KEY")
 if not API_KEY:
     print("Warning: LAMBDA_CAPTURE_API_KEY not set in environment", file=sys.stderr)
@@ -14,34 +22,34 @@ mcp = FastMCP(
         name="Lambda Capture Economic Data",
         host="127.0.0.1", 
         port=8000,
+        json_response=True
     )
 
-@mcp.tool(description="Perform semantic search on Macroeconomic Data Knowledge Base from Federal Reserve, Bank of England, and European Central Bank.")
+@mcp.tool(description="Perform semantic search on Macroeconomic Data Knowledge Base from Federal Reserve, Bank of England, and European Central Bank.",
+          annotations=ToolAnnotations(readOnlyHint=True,idempotentHint=True,openWorldHint=True,))
 async def macroecon_semantic_search(
-    query_text: str,
-    max_results: int = 10,
-    type: list[Literal["text", "table", "chart"]] | None = None,
-    source: list[Literal["Federal Reserve", "Bank of England", "European Central Bank"]] | None = None,
-    score: float = 0.75,
-    start_date: str = "2018-01-01",
-    end_date: str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-) -> list[dict]:
-    """
-    Perform semantic search on Macroeconomic Data Knowledge Base from Federal Reserve, Bank of England, and European Central Bank.
-    
-    Args:
-        api_key: Your Lambda Capture API key. **required parameter**.
-        query_text: The search query text (e.g., "Inflation expectations"). **required parameter**.
-        max_results: Maximum number of results to return (default: 10)
-        type: List of content types to filter by (e.g., ["text", "table", "chart"] or None for all)
-        source: List of sources to filter by (e.g., ["Federal Reserve", "Bank of England", "European Central Bank"] or None for all)
-        score: Minimum similarity score (0-1, default: 0.75)
-        start_date: Start date for filtering results (YYYY-MM-DD). Default is 2018-01-01. If request needs recent/latest data, set nearest date to today up to 3 months ago.
-        end_date: End date for filtering results (YYYY-MM-DD). Default is today's date.
-    
-    Returns:
-        List of relevant search results from Macroeconomic Data Knowledge Base.
-    """
+    query_text: str = Field(description="The search query text (e.g., Inflation expectations)"),
+    score: float = Field(default=0.75, ge=0, le=1, description="Minimum relevance score threshold"),
+    max_results: int = Field(default=10, ge=1, description="Maximum number of results to return"),
+    type: list[Literal["text", "table", "chart"]] | None = Field(
+        default=None, 
+        description="Filter results by content type (text, table, or chart) or None for all"
+    ),
+    source: list[Literal["Federal Reserve", "Bank of England", "European Central Bank"]] | None = Field(
+        default=None,
+        description="Filter results by source institution or None for all"
+    ),
+    start_date: str = Field(
+        default="2018-01-01",
+        description="Start date for filtering results (YYYY-MM-DD). If request needs recent/latest data, set start_date nearest to today up to 3 months ago.",
+        pattern=r"^\d{4}-\d{2}-\d{2}$"
+    ),
+    end_date: str = Field(
+        default=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        description="End date for filtering results (YYYY-MM-DD). if None, set to today - this is better for **most recent data**. default is today",
+        pattern=r"^\d{4}-\d{2}-\d{2}$"
+    )
+) -> JSONResponse:
 
     # Request parameters
     params = {
@@ -60,8 +68,8 @@ async def macroecon_semantic_search(
     }
 
     # Make the request to Lambda Capture API
-    async with httpx.AsyncClient() as client:
-        try:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:    
             response = await client.request(
                 "GET",
                 "https://app.lambda-capture.com/semantic-search/",
@@ -70,32 +78,41 @@ async def macroecon_semantic_search(
             )
             response.raise_for_status()
             data = response.json()
-            # Check for context window overflow
-            total_tokens = sum(item.get("token_count", 0) for item in data)
-            max_tokens = 100_000  # Claude's context window size
-            if total_tokens > max_tokens:
-                # If we're over the limit, truncate the results
-                truncated_data = []
-                current_tokens = 0
-                for item in data:
-                    item_tokens = item.get("token_count", 0)
-                    if current_tokens + item_tokens > max_tokens:
-                        break
-                    truncated_data.append(item)
-                    current_tokens += item_tokens
-                
-                # Add a warning about truncation
-                if truncated_data:
-                    truncated_data[0]["warning"] = f"Results truncated due to token limit. Showing {len(truncated_data)} of {len(data)} results."
-                return truncated_data
-            return data
+            if not data or len(data) == 0:
+                return EmptyResult() #[]
+            else:
+                total_tokens = sum(item.get("token_count", 0) for item in data)
+                max_tokens = 2_000  # Claude's Pro context window size is 100_000
+                if total_tokens > max_tokens:
+                    # If we're over the limit, truncate the results
+                    truncated_data = []
+                    current_tokens = 0
+                    for item in data:
+                        item_tokens = item.get("token_count", 0)
+                        if current_tokens + item_tokens > max_tokens:
+                            break
+                        truncated_data.append(item)
+                        current_tokens += item_tokens
+                    
+                    # Add a warning about truncation
+                    if truncated_data:
+                        truncated_data[0]["warning"] = f"Results truncated due to token limit. Showing {len(truncated_data)} of {len(data)} results."
+                    return truncated_data
+                return data
         
         except httpx.HTTPError as e:
             if e.response is not None:
-                error_msg = e.response.json().get("error message", str(e))
+                raise McpError(
+                    error=ErrorData(
+                        code=e.response.status_code, message=e.response.json().get("error", "Unknown error")
+                    )
+                )
             else:
-                error_msg = str(e)
-            raise Exception(f"Lambda Capture semantic search failed: {error_msg}", file=sys.stderr)
+                raise McpError(
+                    error=ErrorData(
+                        code=500, message=str(e)
+                    )
+                )
 
 if __name__ == "__main__":
     print("Lambda Capture MCP Server is running", file=sys.stderr)
