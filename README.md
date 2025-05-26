@@ -19,7 +19,7 @@ resp = client.responses.create(
         {
             "type": "mcp",
             "server_label": "lambda-capture",
-            "server_url": "https://mcp.lambda-capture.com/research/mcp/",
+            "server_url": "https://mcp.lambda-capture.com/v1/mcp/",
             "headers": {
                 "Authorization": "Bearer YOUR_ACCESS_TOKEN"
             }
@@ -32,7 +32,7 @@ print(resp.output_text)
 ### Curl 
 ```bash
 
-curl -X POST "https://mcp.lambda-capture.com/research/mcp/" \
+curl -X POST "https://mcp.lambda-capture.com/v1/mcp/" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json, text/event-stream" \
 -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -51,7 +51,7 @@ curl -X POST "https://mcp.lambda-capture.com/research/mcp/" \
 ```
 ```bash
 
-curl -X POST "https://mcp.lambda-capture.com/research/mcp" \
+curl -X POST "https://mcp.lambda-capture.com/v1/mcp/" \
 -H "Content-Type: application/json" \
 -H "Accept: application/json" \
 -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
@@ -72,7 +72,7 @@ Go to Claude -> Settings -> Developer -> Edit Config. Add the following to your 
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.lambda-capture.com/research/mcp/"",
+        "https://mcp.lambda-capture.com/v1/mcp/",
         "--header", "Authorization: Bearer YOUR_ACCESS_TOKEN"
       ],
       "description": "RemoteMCP with Lambda Capture Macroeconomic Data API"
