@@ -1,10 +1,10 @@
 # Lambda Capture MCP Server
-[![Remote MCP Server](https://img.shields.io/website-up-down-green-red/http/lambda-mcp.azurewebsites.net/health-check/.svg?label=Remote%20MCP%20Status)](https://lambda-capture.com/) [![GET/POST API](https://img.shields.io/website-up-down-green-red/http/app.lambda-capture.com/.svg?label=GET/POST%20API)](https://lambda-capture.com/)  
+[![Remote MCP Server](https://img.shields.io/website-up-down-green-red/http/mcp.lambda-capture/health-check/.svg?label=Remote%20MCP%20Status)](https://lambda-capture.com/) [![GET/POST API](https://img.shields.io/website-up-down-green-red/http/app.lambda-capture.com/.svg?label=GET/POST%20API)](https://lambda-capture.com/)  
 MCP implementation of our standard [Semantic Search API for Macroeconomic Data](https://github.com/lambda-capture/Semantic-Search-API)
 ![Lambda Capture MCP Server](logo.png)
 
 ## Remote MCP Server (streamable HTTP)
-Check server status [HERE](https://lambda-mcp.azurewebsites.net/)
+Check server status [HERE](https://mcp.lambda-capture.com/)
 ### [OpenAI Responses API](https://platform.openai.com/docs/guides/tools-remote-mcp)
 ```python
 
