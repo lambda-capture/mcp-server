@@ -43,7 +43,7 @@ curl -X POST "https://mcp.lambda-capture.com/v1/mcp/" \
     "name": "macroecon_semantic_search",
     "arguments": {
       "query_text": "inflation expectations",
-      "max_results": 3,
+      "max_results": 3
     }
   }
 }'
