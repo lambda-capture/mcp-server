@@ -52,7 +52,7 @@ curl -X POST "https://mcp.lambda-capture.com/v1/mcp/" \
 
 curl -X POST "https://mcp.lambda-capture.com/v1/mcp/" \
 -H "Content-Type: application/json" \
--H "Accept: application/json" \
+-H "Accept: application/json, text/event-stream" \
 -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
 -d '{
     "jsonrpc": "2.0",
